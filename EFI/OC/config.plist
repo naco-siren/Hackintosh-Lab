@@ -375,6 +375,36 @@
 				<key>TableSignature</key>
 				<data></data>
 			</dict>
+			<dict>
+				<key>Base</key>
+				<string></string>
+				<key>BaseSkip</key>
+				<integer>0</integer>
+				<key>Comment</key>
+				<string>Change _OSI to XOSI - macOS takes Windows 2015 branch so OSYS=0x07DF, enabling GpioInt for TPD0 (I2C touchpad)</string>
+				<key>Count</key>
+				<integer>0</integer>
+				<key>Enabled</key>
+				<true/>
+				<key>Find</key>
+				<data>X09TSQ==</data>
+				<key>Limit</key>
+				<integer>0</integer>
+				<key>Mask</key>
+				<data></data>
+				<key>OemTableId</key>
+				<data></data>
+				<key>Replace</key>
+				<data>WE9TSQ==</data>
+				<key>ReplaceMask</key>
+				<data></data>
+				<key>Skip</key>
+				<integer>0</integer>
+				<key>TableLength</key>
+				<integer>0</integer>
+				<key>TableSignature</key>
+				<data></data>
+			</dict>
 		</array>
 		<key>Quirks</key>
 		<dict>
@@ -1024,9 +1054,9 @@
 				<key>BundlePath</key>
 				<string>VoodooI2CAtmelMXT.kext</string>
 				<key>Comment</key>
-				<string>VoodooI2CAtmelMXT.kext</string>
+				<string>VoodooI2CAtmelMXT.kext - disabled; DSDT touchpad is Synaptics, not Atmel</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooI2CAtmelMXT</string>
 				<key>MaxKernel</key>
@@ -1042,9 +1072,9 @@
 				<key>BundlePath</key>
 				<string>VoodooI2CELAN.kext</string>
 				<key>Comment</key>
-				<string>VoodooI2CELAN.kext</string>
+				<string>VoodooI2CELAN.kext - disabled; DSDT touchpad is Synaptics, not ELAN</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooI2CELAN</string>
 				<key>MaxKernel</key>
@@ -1060,9 +1090,9 @@
 				<key>BundlePath</key>
 				<string>VoodooI2CFTE.kext</string>
 				<key>Comment</key>
-				<string>VoodooI2CFTE.kext</string>
+				<string>VoodooI2CFTE.kext - disabled; DSDT touchpad is Synaptics, not Focaltech</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooI2CFTE</string>
 				<key>MaxKernel</key>
@@ -1078,9 +1108,9 @@
 				<key>BundlePath</key>
 				<string>VoodooI2CHID.kext</string>
 				<key>Comment</key>
-				<string>VoodooI2CHID.kext</string>
+				<string>VoodooI2CHID.kext - disabled to prevent TPD0._CID=PNP0C50 match hijacking VoodooI2CSynaptics</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooI2CHID</string>
 				<key>MaxKernel</key>
