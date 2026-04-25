@@ -110,56 +110,47 @@ Expected acceptance criteria:
 
 **Sleep**: identical to Iter 1 — power LED stays on (no real S3 entry), Apple menu Sleep blacks screen for 0.5s then immediately wakes. Adding `enable-backlight-registers-fix` DeviceProperty + dropping `igfxonln=1` did NOT change the picture. **Diagnosis must shift**: the issue is not iGPU framebuffer recovery, it's that the system **never enters S3 in the first place**. Some component (USB / BT / Wi-Fi / EC) is either vetoing the sleep transition or generating an immediate wake event.
 
-### Iteration 3 — [PENDING]
+### Iteration 3 — partial diagnosis, both fronts inconclusive
 
-**Strategy**: pivot both fronts.
+**Trackpad (T-PS2 attempt)**: User reports "和之前没区别" — *zero* perceptible change after disabling all VoodooI2C kexts. Captured `kextstat` shows the actual driver chain in this state:
+- VoodooI2C parent kext: not in kextstat (correctly disabled)
+- VoodooI2CSynaptics: not loaded (correctly disabled)
+- VoodooPS2Trackpad: loaded but does nothing (G5 hardware doesn't expose touchpad surface to PS/2 controller, only TrackPoint nub)
+- **`AppleIntelLpssI2C` + `AppleIntelLpssI2CController` (macOS stock): loaded** — this is what's actually driving the trackpad surface
+- `AppleTopCaseHIDEventDriver`: stock Apple HID driver atop the I2C HID device
 
-**Trackpad — T-PS2 (full PS/2 path)**:
-- Config-disable `VoodooI2C.kext` + `VoodooI2CSynaptics.kext` (kept on disk, just `Enabled=false` for easy rollback)
-- VoodooI2CHID was already disabled
-- `VoodooPS2Controller` + `VoodooPS2Trackpad` + `VoodooPS2Mouse` + `VoodooPS2Keyboard` already enabled
-- Standalone `VoodooInput.kext` stays enabled (PS/2 trackpad uses it for Magic Trackpad emulation)
-- **PHYSICAL CAVEAT**: G5's touchpad is wired as I2C-HID at the chipset level. PS/2 path can only see it if BIOS exposes a "legacy PS/2" mode. User to check **BIOS → Advanced → look for "Touchpad: Native / Legacy" or "Legacy support"** before booting Iter 3.
-- Worst case: trackpad surface dead, but TrackPoint nub (PS/2 native) still works, and Iter 4 swings back to T2 (VoodooRMI) or T3 (VoodooI2CHID).
+**Conclusion**: macOS's stock I2C HID stack has been driving the touchpad all along. Nothing we change on the third-party kext side meaningfully alters input. The trackpad's actual report descriptor (firmware-baked, can't change) likely doesn't expose Magic Trackpad-style multi-finger reports, so even VoodooInput can't synthesize 4/5-finger gestures from it. **This is the upper limit of this hardware × Big Sur combo.** Recommended action: re-enable VoodooI2C + VoodooI2CSynaptics (at least the SYNA2393 IOPropertyMatch path is preserved) and accept the jitter; long-term solution is external pointing device.
 
-**Sleep — diagnostic-first + S5**:
-- Add `hbfx-ahbm=1` boot-arg (HibernationFixup forces pure S3, disables hibernate which can mask wake-veto issues)
-- **Run pmset diagnostic before next test** to identify what's preventing sleep:
-  ```
-  sudo pmset -g log | grep -iE "sleep|wake|powerd|denied" | tail -100
-  pmset -g assertions
-  log show --last 5m --predicate 'eventMessage CONTAINS "sleep" OR eventMessage CONTAINS "wake"' | tail -50
-  ```
-- Common Hackintosh wake-immediate culprits to look for in output:
-  - `kernel: AppleACPIPlatform` mentions wake source = `EC` / `XHC` / `RP*` / `GLAN`
-  - `IOPMrootDomain: assertion` from BCM Wi-Fi or BT
-  - `kernel: USBF` resume events from a peripheral
-- Next iteration's sleep moves depend on what the log says.
+**Side note**: previously suspected USB device `0x138a:0x00ab` on the trackpad track is actually the **Validity / Synaptics fingerprint reader**, NOT the touchpad. (Vendor 0x138a = Validity Sensors, HP G5 standard fingerprint reader.) The actual touchpad is on the I2C bus and doesn't enumerate as USB at all.
 
-**Concrete config.plist deltas vs Iter 2**:
-- VoodooI2C.kext Enabled: true → false
-- VoodooI2CSynaptics.kext Enabled: true → false
-- boot-args: append ` hbfx-ahbm=1`
+**Sleep**: pmset/syslog data revealed the actual chain — sleep IS being entered, but stops at Dark Wake:
+- 12:09:25 — first lid close detected, but `clamshell sleep on close: NO` (macOS policy delay)
+- 12:09:44 — 19s later policy flips to YES, kernel logs `sleep reason Clamshell Sleep`, `kIOMessageSystemWillSleep` fires, drivers ack
+- 12:09:44.565 — `dasd: Entering dark wake` — system enters Dark Wake instead of progressing to S3
+- system stays in Dark Wake until `darkwakelinger` 15s timer expires; then a *new* darkwakelinger is created (because background tasks aren't done) → loop. Power LED never breathes because Dark Wake isn't deep sleep.
+- 12:10:49 — user opened lid, full wake.
 
-**Config delta from baseline**:
-- Kext: revert VoodooI2C / VoodooI2CSynaptics / VoodooI2CHID / VoodooInput to baseline 2.8 / 1.1.3 (preserve baseline behavior on trackpad)
-- boot-args: drop `igfxonln=1`, **keep** `-igfxblr` only
-- DeviceProperties `PciRoot(0x0)/Pci(0x2,0x0)`: add `enable-backlight-registers-fix = <01000000>` (the actual companion to `-igfxblr` — without this, `-igfxblr` alone is partially active)
+`Total Sleep/Wakes since boot: 0` — system never entered real S3.
 
-**What this isolates**:
-- Trackpad: should return to baseline state (1/5 jitter but 4/5-finger works) — confirms 2.9.1 was the regression
-- Sleep: should now ACTUALLY enter S3 (power LED blinks) AND wake cleanly (screen relit by registers-fix)
+This is the **classic Hackintosh "Dark Wake stuck on AC"** pattern. On AC, macOS deliberately stays in Dark Wake for push/AirDrop maintenance and only progresses to S3 after various background completions. On battery, the policy is much more aggressive about progressing to S3.
 
-**Acceptance criteria**:
-- Power LED **blinks** (or breathes) on lid close → confirms real sleep entered
-- Lid open → screen relights within 1-2s → confirms registers-fix works
-- Apple menu → Sleep → black screen → press key → screen back
+### Iteration 4 — accept trackpad, retest sleep on battery
 
-**If sleep works in Iter 2**: trackpad becomes Iter 3's exclusive focus. Likely path: T3 (disable VoodooI2CSynaptics, enable VoodooI2CHID — different driver, different VoodooInput integration).
+**Trackpad**:
+- Re-enable `VoodooI2C.kext` + `VoodooI2CSynaptics.kext` (SYNA2393 IOPropertyMatch already in their Info.plist). Doesn't fix the jitter but restores the path that's at least Synaptics-aware. Mark trackpad as **frozen** — no more iteration; jitter is the upper bound on Big Sur for this exact hardware.
+- Long-term workaround: external Magic Trackpad / Magic Mouse via BT works perfectly (we verified BT works in Iter 0 — AirDropped bluetooth.txt as proof).
 
-**If sleep still broken in Iter 2**: add S4 (`enable-backlight-smoother`) + S5 (`hbfx-ahbm=1`) in Iter 3. Last resort = SSDT-LIDFIX (S6).
+**Sleep — diagnostic-driven Iter 4**:
+- Scripted additions: `pmset -a proximitywake 0` (disable Continuity proximity wake via BT), `pmset -a sleepservicestimeout 1` (shrink Sleep Services window).
+- **Critical: test on BATTERY (unplug AC)**. macOS Dark Wake policy on battery is much shorter — system should progress to S3 within seconds. If yes → "AC = Dark Wake, Battery = S3" is by design and expected; user accepts AC behavior or applies one of the longer-term workarounds (NVRAM clamshell-sleep override, or live with it).
+- If battery sleep STILL fails → deeper ACPI _LID issue or driver wake bug; would write SSDT-LIDFIX or block specific drivers from generating wake events.
 
----
+**Concrete deltas vs Iter 3**:
+- `VoodooI2C.kext` Enabled: false → **true**
+- `VoodooI2CSynaptics.kext` Enabled: false → **true**
+- `sleep-diagnose.sh` script: add 3 pmset settings + battery instruction in lid-close prompt
+- No new boot-args, no DeviceProperties changes, no SSDT additions.
+
 
 ## Hardware-side things to also check post-Big-Sur
 

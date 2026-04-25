@@ -40,13 +40,20 @@ read -p "Have you unplugged the ADATA USB stick (and any non-essential USB)? Pre
 
 echo
 echo "===== STEP 2: Apply pmset disable-wake-sources settings =====" | tee -a session.log
-sudo pmset -a womp 0                2>&1 | tee -a session.log
-sudo pmset -a tcpkeepalive 0        2>&1 | tee -a session.log
-sudo pmset -a networkoversleep 0    2>&1 | tee -a session.log
-sudo pmset -a powernap 0            2>&1 | tee -a session.log
-sudo pmset -a hibernatemode 0       2>&1 | tee -a session.log
-sudo pmset -a standby 0             2>&1 | tee -a session.log
-sudo pmset -a autopoweroff 0        2>&1 | tee -a session.log
+sudo pmset -a womp 0                  2>&1 | tee -a session.log
+sudo pmset -a tcpkeepalive 0          2>&1 | tee -a session.log
+sudo pmset -a networkoversleep 0      2>&1 | tee -a session.log
+sudo pmset -a powernap 0              2>&1 | tee -a session.log
+sudo pmset -a hibernatemode 0         2>&1 | tee -a session.log
+sudo pmset -a standby 0               2>&1 | tee -a session.log
+sudo pmset -a autopoweroff 0          2>&1 | tee -a session.log
+sudo pmset -a proximitywake 0         2>&1 | tee -a session.log   # NEW: disable Continuity proximity wake (BT)
+sudo pmset -a sleepservicestimeout 1  2>/dev/null | tee -a session.log || true   # NEW: shrink Sleep Services window
+sudo pmset -a darkwakes 0             2>/dev/null | tee -a session.log || true   # legacy key, may not exist on Big Sur
+
+# Note: macOS deliberately uses Dark Wake on AC for push/AirDrop maintenance — pmset
+# can't fully forbid it on AC. Battery has more aggressive policy and will reach S3
+# faster. Iter 4 explicitly tests on BATTERY for that reason.
 
 # Save the resulting pmset state for review
 pmset -g > pmset-settings.txt
@@ -62,13 +69,18 @@ echo "===== STEP 4: Lid-close test ====="
 echo
 echo "INSTRUCTIONS:"
 echo "  1. Save any work in other apps. Quit Music, Safari, browsers — anything that holds Audio/Network assertions."
-echo "  2. CLOSE THE LAPTOP LID."
-echo "  3. WAIT AT LEAST 90 SECONDS — this gives sleep enough time to settle and any wake event to fire."
-echo "  4. OPEN THE LID."
-echo "  5. Come back to this Terminal."
+echo "  2. **UNPLUG THE AC POWER ADAPTER** — Iter 4 specifically tests on battery. macOS uses Dark Wake"
+echo "     on AC for push/AirDrop maintenance, which can prevent transition to deep S3 indefinitely. Battery"
+echo "     mode has more aggressive sleep policy."
+echo "  3. CLOSE THE LAPTOP LID."
+echo "  4. WAIT AT LEAST 90 SECONDS — this gives sleep enough time to settle and any wake event to fire."
+echo "  5. OPEN THE LID."
+echo "  6. Plug AC back in if you want to charge / continue."
+echo "  7. Come back to this Terminal."
 echo
 echo "Observe and remember:"
-echo "  - Did the power LED start to BREATHE (real S3 sleep)?"
+echo "  - Did the power LED start to BREATHE within ~5 seconds of lid close (real S3 sleep)?"
+echo "  - Or did the LED stay solid (Dark Wake stuck — same as Iter 3)?"
 echo "  - Did opening the lid wake the screen, or did you have to press the power button?"
 echo
 read -p "Press ENTER once you're back from the lid-close test: " _

@@ -1038,9 +1038,9 @@
 				<key>BundlePath</key>
 				<string>VoodooI2C.kext</string>
 				<key>Comment</key>
-				<string>VoodooI2C.kext - Iter 3 disabled to test VoodooPS2Trackpad path on this G5 unit</string>
+				<string>VoodooI2C.kext - re-enabled in Iter 4 after PS/2 path proved touchpad surface routes through stock AppleIntelLpssI2C anyway</string>
 				<key>Enabled</key>
-				<false/>
+				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooI2C</string>
 				<key>MaxKernel</key>
@@ -1128,9 +1128,9 @@
 				<key>BundlePath</key>
 				<string>VoodooI2CSynaptics.kext</string>
 				<key>Comment</key>
-				<string>VoodooI2CSynaptics.kext - Iter 3 disabled to free TPD0 for PS2 path</string>
+				<string>VoodooI2CSynaptics.kext - re-enabled in Iter 4 (with SYNA2393 IOPropertyMatch); accept Big Sur trackpad jitter as hardware/macOS limit</string>
 				<key>Enabled</key>
-				<false/>
+				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooI2CSynaptics</string>
 				<key>MaxKernel</key>
