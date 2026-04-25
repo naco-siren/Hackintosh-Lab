@@ -1,0 +1,13 @@
+[    0.863873] i2c_dev: i2c /dev entries driver
+[    1.953079] input: SYNA3071:00 06CB:82F1 Mouse as /devices/pci0000:00/0000:00:15.1/i2c_designware.1/i2c-1/i2c-SYNA3071:00/0018:06CB:82F1.0001/input/input11
+[    1.953176] input: SYNA3071:00 06CB:82F1 Touchpad as /devices/pci0000:00/0000:00:15.1/i2c_designware.1/i2c-1/i2c-SYNA3071:00/0018:06CB:82F1.0001/input/input12
+[    1.953260] hid-generic 0018:06CB:82F1.0001: input,hidraw0: I2C HID v1.00 Mouse [SYNA3071:00 06CB:82F1] on i2c-SYNA3071:00
+[    2.028383] input: SYNA3071:00 06CB:82F1 Mouse as /devices/pci0000:00/0000:00:15.1/i2c_designware.1/i2c-1/i2c-SYNA3071:00/0018:06CB:82F1.0001/input/input14
+[    2.028633] input: SYNA3071:00 06CB:82F1 Touchpad as /devices/pci0000:00/0000:00:15.1/i2c_designware.1/i2c-1/i2c-SYNA3071:00/0018:06CB:82F1.0001/input/input15
+[    2.028708] hid-multitouch 0018:06CB:82F1.0001: input,hidraw0: I2C HID v1.00 Mouse [SYNA3071:00 06CB:82F1] on i2c-SYNA3071:00
+[    3.190113] psmouse serio3: synaptics: queried max coordinates: x [..5658], y [..4736]
+[    3.219141] psmouse serio3: synaptics: queried min coordinates: x [1286..], y [1114..]
+[    3.219149] psmouse serio3: synaptics: Your touchpad (PNP: SYN3071 SYN0002 PNP0f13) says it can support a different bus. If i2c-hid and hid-rmi are not used, you might want to try setting psmouse.synaptics_intertouch to 1 and report this to linux-input@vger.kernel.org.
+[    3.270080] psmouse serio3: synaptics: Touchpad model: 1, fw: 10.16, id: 0x1e2a1, caps: 0xf00123/0x840300/0x12e800/0x500000, board id: 3352, fw id: 2727989
+[    3.302315] input: SynPS/2 Synaptics TouchPad as /devices/platform/i8042/serio3/input/input17
+[    3.672502] i2c i2c-2: Successfully instantiated SPD at 0x50

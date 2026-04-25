@@ -1,0 +1,22 @@
+/:  Bus 001.Port 001: Dev 001, Class=root_hub, Driver=xhci_hcd/12p, 480M
+    ID 1d6b:0002 Linux Foundation 2.0 root hub
+    |__ Port 007: Dev 002, If 0, Class=Vendor Specific Class, Driver=btusb, 12M
+        ID 0489:e07a Foxconn / Hon Hai Broadcom BCM20702A1 Bluetooth
+    |__ Port 007: Dev 002, If 1, Class=Vendor Specific Class, Driver=btusb, 12M
+        ID 0489:e07a Foxconn / Hon Hai Broadcom BCM20702A1 Bluetooth
+    |__ Port 007: Dev 002, If 2, Class=Vendor Specific Class, Driver=btusb, 12M
+        ID 0489:e07a Foxconn / Hon Hai Broadcom BCM20702A1 Bluetooth
+    |__ Port 007: Dev 002, If 3, Class=Application Specific Interface, Driver=[none], 12M
+        ID 0489:e07a Foxconn / Hon Hai Broadcom BCM20702A1 Bluetooth
+    |__ Port 008: Dev 003, If 0, Class=Vendor Specific Class, Driver=[none], 12M
+        ID 138a:00ab Validity Sensors, Inc. 
+    |__ Port 009: Dev 004, If 0, Class=Video, Driver=uvcvideo, 480M
+        ID 04ca:706d Lite-On Technology Corp. 
+    |__ Port 009: Dev 004, If 1, Class=Video, Driver=uvcvideo, 480M
+        ID 04ca:706d Lite-On Technology Corp. 
+/:  Bus 002.Port 001: Dev 001, Class=root_hub, Driver=xhci_hcd/6p, 5000M
+    ID 1d6b:0003 Linux Foundation 3.0 root hub
+/:  Bus 003.Port 001: Dev 001, Class=root_hub, Driver=xhci_hcd/2p, 480M
+    ID 1d6b:0002 Linux Foundation 2.0 root hub
+/:  Bus 004.Port 001: Dev 001, Class=root_hub, Driver=xhci_hcd/2p, 10000M
+    ID 1d6b:0003 Linux Foundation 3.0 root hub

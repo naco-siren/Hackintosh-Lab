@@ -1,0 +1,32 @@
+=== boltctl list ===
+ o Other World Computing Thunderbolt 3 Dock
+   |- type:          peripheral
+   |- name:          Thunderbolt 3 Dock
+   |- vendor:        Other World Computing
+   |- uuid:          REDACTED
+   |- generation:    Thunderbolt 3
+   |- status:        disconnected
+   |- authorized:    Fri 24 Apr 2026 09:22:01 PM UTC
+   |- connected:     Fri 24 Apr 2026 09:22:01 PM UTC
+   `- stored:        Fri 24 Apr 2026 09:22:01 PM UTC
+      |- policy:     iommu
+      `- key:        no
+
+
+=== /sys/bus/thunderbolt/devices/ ===
+total 0
+drwxr-xr-x 2 root root 0 Apr 24 14:20 .
+drwxr-xr-x 4 root root 0 Apr 24 14:20 ..
+lrwxrwxrwx 1 root root 0 Apr 24 14:20 0-0 -> ../../../devices/pci0000:00/0000:00:1c.4/0000:02:00.0/0000:03:00.0/0000:04:00.0/domain0/0-0
+lrwxrwxrwx 1 root root 0 Apr 24 14:20 domain0 -> ../../../devices/pci0000:00/0000:00:1c.4/0000:02:00.0/0000:03:00.0/0000:04:00.0/domain0
+
+=== dmesg | grep thunderbolt ===
+[    0.022813] ACPI: SSDT 0x0000000097F96000 004BF2 (v02 HP     HPTBT    00001000 INTL 20160527)
+[    1.745062] ACPI: bus type thunderbolt registered
+[  121.098577] usb 6-3: Product: OWC Thunderbolt 3 Dock SD Card Reader
+[  121.178235] thunderbolt 0-1: new device found, vendor=0x5a device=0xde21
+[  121.178239] thunderbolt 0-1: Other World Computing Thunderbolt 3 Dock
+[  121.447584] usb 5-4: Product: OWC Thunderbolt 3 Audio Device
+[  122.062535] input: Other World Computing OWC Thunderbolt 3 Audio Device as /devices/pci0000:00/0000:00:1c.4/0000:02:00.0/0000:03:01.0/0000:05:00.0/0000:06:00.0/0000:07:00.0/usb5/5-4/5-4:1.3/0003:1E91:4001.0002/input/input29
+[  122.113243] hid-generic 0003:1E91:4001.0002: input,hidraw1: USB HID v1.11 Device [Other World Computing OWC Thunderbolt 3 Audio Device] on usb-0000:07:00.0-4/input3
+[  142.690752] thunderbolt 0-1: device disconnected

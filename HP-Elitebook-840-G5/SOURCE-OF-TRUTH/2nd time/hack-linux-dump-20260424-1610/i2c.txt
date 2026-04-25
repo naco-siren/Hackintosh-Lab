@@ -1,0 +1,52 @@
+=== /sys/bus/i2c/devices/*/name ===
+/sys/bus/i2c/devices/2-0036/name:dummy
+/sys/bus/i2c/devices/2-0037/name:dummy
+/sys/bus/i2c/devices/2-0050/name:ee1004
+/sys/bus/i2c/devices/i2c-0/name:Synopsys DesignWare I2C adapter
+/sys/bus/i2c/devices/i2c-1/name:Synopsys DesignWare I2C adapter
+/sys/bus/i2c/devices/i2c-2/name:SMBus I801 adapter at 0000:00:1f.4
+/sys/bus/i2c/devices/i2c-3/name:i915 gmbus dpc
+/sys/bus/i2c/devices/i2c-4/name:i915 gmbus dpb
+/sys/bus/i2c/devices/i2c-5/name:i915 gmbus dpd
+/sys/bus/i2c/devices/i2c-6/name:AUX A/DDI A/PHY A
+/sys/bus/i2c/devices/i2c-7/name:AUX B/DDI B/PHY B
+/sys/bus/i2c/devices/i2c-8/name:AUX C/DDI C/PHY C
+/sys/bus/i2c/devices/i2c-SYNA3071:00/name:SYNA3071:00
+
+=== ls /sys/bus/i2c/devices/ ===
+total 0
+drwxr-xr-x 2 root root 0 Apr 24 15:49 .
+drwxr-xr-x 4 root root 0 Apr 24 15:49 ..
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 2-0036 -> ../../../devices/pci0000:00/0000:00:1f.4/i2c-2/2-0036
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 2-0037 -> ../../../devices/pci0000:00/0000:00:1f.4/i2c-2/2-0037
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 2-0050 -> ../../../devices/pci0000:00/0000:00:1f.4/i2c-2/2-0050
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 i2c-0 -> ../../../devices/pci0000:00/0000:00:15.0/i2c_designware.0/i2c-0
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 i2c-1 -> ../../../devices/pci0000:00/0000:00:15.1/i2c_designware.1/i2c-1
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 i2c-2 -> ../../../devices/pci0000:00/0000:00:1f.4/i2c-2
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 i2c-3 -> ../../../devices/pci0000:00/0000:00:02.0/i2c-3
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 i2c-4 -> ../../../devices/pci0000:00/0000:00:02.0/i2c-4
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 i2c-5 -> ../../../devices/pci0000:00/0000:00:02.0/i2c-5
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 i2c-6 -> ../../../devices/pci0000:00/0000:00:02.0/drm/card1/card1-eDP-1/i2c-6
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 i2c-7 -> ../../../devices/pci0000:00/0000:00:02.0/drm/card1/card1-DP-1/i2c-7
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 i2c-8 -> ../../../devices/pci0000:00/0000:00:02.0/drm/card1/card1-DP-2/i2c-8
+lrwxrwxrwx 1 root root 0 Apr 24 15:49 i2c-SYNA3071:00 -> ../../../devices/pci0000:00/0000:00:15.1/i2c_designware.1/i2c-1/i2c-SYNA3071:00
+
+=== i2cdetect per bus (if i2c-tools installed) ===
+--- i2c-0 ---
+(i2cdetect not available or bus busy)
+--- i2c-1 ---
+(i2cdetect not available or bus busy)
+--- i2c-2 ---
+(i2cdetect not available or bus busy)
+--- i2c-3 ---
+(i2cdetect not available or bus busy)
+--- i2c-4 ---
+(i2cdetect not available or bus busy)
+--- i2c-5 ---
+(i2cdetect not available or bus busy)
+--- i2c-6 ---
+(i2cdetect not available or bus busy)
+--- i2c-7 ---
+(i2cdetect not available or bus busy)
+--- i2c-8 ---
+(i2cdetect not available or bus busy)
