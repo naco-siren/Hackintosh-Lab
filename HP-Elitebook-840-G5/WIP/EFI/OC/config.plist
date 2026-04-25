@@ -499,6 +499,8 @@
 				<data>FlkAAA==</data>
 				<key>device_type</key>
 				<string>VGA compatible controller</string>
+				<key>enable-backlight-registers-fix</key>
+				<data>AQAAAA==</data>
 				<key>enable-hdmi-dividers-fix</key>
 				<data>AQAAAA==</data>
 				<key>enable-hdmi20</key>
@@ -1596,7 +1598,7 @@
 				<key>SystemAudioVolume</key>
 				<data>Rg==</data>
 				<key>boot-args</key>
-				<string>keepsyms=1 -v debug=0x100 darkwake=0 swd_panic=1 amfi=0x80 brcmfx-driver=2 agdpmod=pikera igfxonln=1 -igfxblr</string>
+				<string>keepsyms=1 -v debug=0x100 darkwake=0 swd_panic=1 amfi=0x80 brcmfx-driver=2 agdpmod=pikera -igfxblr</string>
 				<key>csr-active-config</key>
 				<data>AwgAAA==</data>
 				<key>prev-lang:kbd</key>

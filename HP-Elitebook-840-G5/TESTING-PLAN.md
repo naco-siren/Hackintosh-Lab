@@ -84,16 +84,47 @@ Expected acceptance criteria:
 
 > Filled in by user feedback after each test boot. AI updates the next iteration accordingly.
 
-### Iteration 1 — [PENDING]
+### Iteration 1 — ❌ failed both fronts
 
 **Config delta from baseline**:
-- Kext: VoodooI2CSynaptics 2.8 → 2.9.1
+- Kext bundle bumped to 2.9.1 (VoodooI2C, VoodooI2CSynaptics, VoodooI2CHID, standalone VoodooInput)
 - boot-args: `+igfxonln=1 -igfxblr`
 
-**Boot result**: TBD
-**Trackpad smoothness**: TBD (1=worse, 5=as smooth as Linux/G3 PS/2)
-**Sleep/wake**: TBD (works clean / works with delay / black screen / panic)
-**Side effects**: TBD
+**Boot result**: clean boot to GUI, system functional
+
+**Trackpad smoothness**: 1/5 (no change in jitter; same as before)
+
+**Trackpad regression**: 4-finger and 5-finger gestures **completely broken** under 2.9.1 (worked with 2.8 baseline). User checked System Information → USB → trackpad reports as `0x138a:0x00ab` (Synaptics raw HID), **NOT** `0x05ac:0x0265` (Magic Trackpad 2). This means **VoodooInput is NOT presenting the device as Magic Trackpad to macOS** under the 2.9.1 stack — macOS treats it as raw HID, only single/dual-finger gestures route. Hypothesis: VoodooI2CSynaptics 2.9.1 + VoodooInput 1.1.6 integration is broken on Big Sur, OR the stock 2.9.1 build of VoodooI2CSynaptics doesn't enable Magic Trackpad emulation by default and needs additional Info.plist tuning.
+
+**Sleep/wake (lid close)**:
+- Test A (30s lid close): screen relit OK, **but power LED never blinked** → system did NOT actually enter S3 sleep. `igfxonln=1` keeps iGPU framebuffer online, effectively preventing sleep entirely.
+- Test B (5min lid close): same as A — screen back, no real sleep
+- Test C (Apple menu → Sleep): screen blacked for ~1s, then immediately reawoke. Failed: system can't enter sleep at all.
+- Test D (30min lid close): skipped — sleep is broken-by-design, no point testing duration
+
+**Net assessment**: `igfxonln=1` is "disable sleep" not "fix sleep". The kext upgrade made trackpad worse. Iter 1 = full negative.
+
+### Iteration 2 — [PENDING]
+
+**Strategy**: conservative split. Revert all trackpad changes (2.9.1 introduced regression) so we're back to "jittery but multi-finger works" baseline state. Address sleep with the *correct* HP+LSPCON recipe (drop `igfxonln=1`, pair `-igfxblr` with companion DeviceProperty).
+
+**Config delta from baseline**:
+- Kext: revert VoodooI2C / VoodooI2CSynaptics / VoodooI2CHID / VoodooInput to baseline 2.8 / 1.1.3 (preserve baseline behavior on trackpad)
+- boot-args: drop `igfxonln=1`, **keep** `-igfxblr` only
+- DeviceProperties `PciRoot(0x0)/Pci(0x2,0x0)`: add `enable-backlight-registers-fix = <01000000>` (the actual companion to `-igfxblr` — without this, `-igfxblr` alone is partially active)
+
+**What this isolates**:
+- Trackpad: should return to baseline state (1/5 jitter but 4/5-finger works) — confirms 2.9.1 was the regression
+- Sleep: should now ACTUALLY enter S3 (power LED blinks) AND wake cleanly (screen relit by registers-fix)
+
+**Acceptance criteria**:
+- Power LED **blinks** (or breathes) on lid close → confirms real sleep entered
+- Lid open → screen relights within 1-2s → confirms registers-fix works
+- Apple menu → Sleep → black screen → press key → screen back
+
+**If sleep works in Iter 2**: trackpad becomes Iter 3's exclusive focus. Likely path: T3 (disable VoodooI2CSynaptics, enable VoodooI2CHID — different driver, different VoodooInput integration).
+
+**If sleep still broken in Iter 2**: add S4 (`enable-backlight-smoother`) + S5 (`hbfx-ahbm=1`) in Iter 3. Last resort = SSDT-LIDFIX (S6).
 
 ---
 
