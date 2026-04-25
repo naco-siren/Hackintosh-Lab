@@ -104,9 +104,42 @@ Expected acceptance criteria:
 
 **Net assessment**: `igfxonln=1` is "disable sleep" not "fix sleep". The kext upgrade made trackpad worse. Iter 1 = full negative.
 
-### Iteration 2 — [PENDING]
+### Iteration 2 — ❌ both still failing
 
-**Strategy**: conservative split. Revert all trackpad changes (2.9.1 introduced regression) so we're back to "jittery but multi-finger works" baseline state. Address sleep with the *correct* HP+LSPCON recipe (drop `igfxonln=1`, pair `-igfxblr` with companion DeviceProperty).
+**Trackpad**: same as Iter 1 ("和刚才那一版没啥区别") — 2.8 baseline didn't actually restore working state. Either (a) Iter 1's 2.9.1 swap didn't truly break anything that 2.8 brings back, the trackpad is just consistently bad in this Big Sur boot, OR (b) something in the post-install state of macOS (kext cache, prebuilt link, login session) doesn't pick up the kext rollback as expected. User decision: stop iterating I2C drivers, **try PS/2 path** even though G5 hardware is nominally I2C-only.
+
+**Sleep**: identical to Iter 1 — power LED stays on (no real S3 entry), Apple menu Sleep blacks screen for 0.5s then immediately wakes. Adding `enable-backlight-registers-fix` DeviceProperty + dropping `igfxonln=1` did NOT change the picture. **Diagnosis must shift**: the issue is not iGPU framebuffer recovery, it's that the system **never enters S3 in the first place**. Some component (USB / BT / Wi-Fi / EC) is either vetoing the sleep transition or generating an immediate wake event.
+
+### Iteration 3 — [PENDING]
+
+**Strategy**: pivot both fronts.
+
+**Trackpad — T-PS2 (full PS/2 path)**:
+- Config-disable `VoodooI2C.kext` + `VoodooI2CSynaptics.kext` (kept on disk, just `Enabled=false` for easy rollback)
+- VoodooI2CHID was already disabled
+- `VoodooPS2Controller` + `VoodooPS2Trackpad` + `VoodooPS2Mouse` + `VoodooPS2Keyboard` already enabled
+- Standalone `VoodooInput.kext` stays enabled (PS/2 trackpad uses it for Magic Trackpad emulation)
+- **PHYSICAL CAVEAT**: G5's touchpad is wired as I2C-HID at the chipset level. PS/2 path can only see it if BIOS exposes a "legacy PS/2" mode. User to check **BIOS → Advanced → look for "Touchpad: Native / Legacy" or "Legacy support"** before booting Iter 3.
+- Worst case: trackpad surface dead, but TrackPoint nub (PS/2 native) still works, and Iter 4 swings back to T2 (VoodooRMI) or T3 (VoodooI2CHID).
+
+**Sleep — diagnostic-first + S5**:
+- Add `hbfx-ahbm=1` boot-arg (HibernationFixup forces pure S3, disables hibernate which can mask wake-veto issues)
+- **Run pmset diagnostic before next test** to identify what's preventing sleep:
+  ```
+  sudo pmset -g log | grep -iE "sleep|wake|powerd|denied" | tail -100
+  pmset -g assertions
+  log show --last 5m --predicate 'eventMessage CONTAINS "sleep" OR eventMessage CONTAINS "wake"' | tail -50
+  ```
+- Common Hackintosh wake-immediate culprits to look for in output:
+  - `kernel: AppleACPIPlatform` mentions wake source = `EC` / `XHC` / `RP*` / `GLAN`
+  - `IOPMrootDomain: assertion` from BCM Wi-Fi or BT
+  - `kernel: USBF` resume events from a peripheral
+- Next iteration's sleep moves depend on what the log says.
+
+**Concrete config.plist deltas vs Iter 2**:
+- VoodooI2C.kext Enabled: true → false
+- VoodooI2CSynaptics.kext Enabled: true → false
+- boot-args: append ` hbfx-ahbm=1`
 
 **Config delta from baseline**:
 - Kext: revert VoodooI2C / VoodooI2CSynaptics / VoodooI2CHID / VoodooInput to baseline 2.8 / 1.1.3 (preserve baseline behavior on trackpad)
