@@ -910,9 +910,9 @@
 				<key>BundlePath</key>
 				<string>AppleALCU.kext</string>
 				<key>Comment</key>
-				<string>AppleALCU.kext</string>
+				<string>AppleALCU.kext - DISABLED; duplicate ALCUserClientProvider class collides with AppleALC, fails to load with 0xdc008017 on Big Sur</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AppleALCU</string>
 				<key>MaxKernel</key>
@@ -1596,7 +1596,7 @@
 				<key>SystemAudioVolume</key>
 				<data>Rg==</data>
 				<key>boot-args</key>
-				<string>keepsyms=1 -v -lilubetaall debug=0x100 darkwake=0 swd_panic=1 amfi=0x80 brcmfx-driver=2 agdpmod=pikera -btlfxboardid -btlfxallowanyaddr</string>
+				<string>keepsyms=1 -v debug=0x100 darkwake=0 swd_panic=1 amfi=0x80 brcmfx-driver=2 agdpmod=pikera igfxonln=1 -igfxblr</string>
 				<key>csr-active-config</key>
 				<data>AwgAAA==</data>
 				<key>prev-lang:kbd</key>
