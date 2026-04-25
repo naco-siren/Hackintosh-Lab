@@ -70,6 +70,14 @@
 				<key>Path</key>
 				<string>SSDT-XOSI.aml</string>
 			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>SSDT-DISABLE-FP.aml - on-disk spare, DISABLED. Iter 6 enabled it and lost BT (cascade); Iter 8 verified GOLDEN config (this one) sleeps cleanly with FP enumerated, so SSDT not needed at runtime — kept available in case FP starts misbehaving again</string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-DISABLE-FP.aml</string>
+			</dict>
 		</array>
 		<key>Delete</key>
 		<array/>

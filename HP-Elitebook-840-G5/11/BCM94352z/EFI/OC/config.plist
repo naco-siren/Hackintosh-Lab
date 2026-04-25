@@ -70,6 +70,14 @@
 				<key>Path</key>
 				<string>SSDT-XOSI.aml</string>
 			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>SSDT-DISABLE-FP.aml - Iter 6: hide Validity fingerprint reader USB port HS07 from macOS to stop periodic XDCI sleep wake</string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-DISABLE-FP.aml</string>
+			</dict>
 		</array>
 		<key>Delete</key>
 		<array/>
@@ -499,6 +507,8 @@
 				<data>FlkAAA==</data>
 				<key>device_type</key>
 				<string>VGA compatible controller</string>
+				<key>enable-backlight-registers-fix</key>
+				<data>AQAAAA==</data>
 				<key>enable-hdmi-dividers-fix</key>
 				<data>AQAAAA==</data>
 				<key>enable-hdmi20</key>
@@ -1036,7 +1046,7 @@
 				<key>BundlePath</key>
 				<string>VoodooI2C.kext</string>
 				<key>Comment</key>
-				<string>VoodooI2C.kext</string>
+				<string>VoodooI2C.kext - re-enabled in Iter 4 after PS/2 path proved touchpad surface routes through stock AppleIntelLpssI2C anyway</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
@@ -1126,7 +1136,7 @@
 				<key>BundlePath</key>
 				<string>VoodooI2CSynaptics.kext</string>
 				<key>Comment</key>
-				<string>VoodooI2CSynaptics.kext</string>
+				<string>VoodooI2CSynaptics.kext - re-enabled in Iter 4 (with SYNA2393 IOPropertyMatch); accept Big Sur trackpad jitter as hardware/macOS limit</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
@@ -1596,7 +1606,7 @@
 				<key>SystemAudioVolume</key>
 				<data>Rg==</data>
 				<key>boot-args</key>
-				<string>keepsyms=1 -v debug=0x100 darkwake=0 swd_panic=1 amfi=0x80 brcmfx-driver=2 agdpmod=pikera</string>
+				<string>keepsyms=1 -v debug=0x100 darkwake=0 swd_panic=1 amfi=0x80 brcmfx-driver=2 agdpmod=pikera -igfxblr hbfx-ahbm=1</string>
 				<key>csr-active-config</key>
 				<data>AwgAAA==</data>
 				<key>prev-lang:kbd</key>

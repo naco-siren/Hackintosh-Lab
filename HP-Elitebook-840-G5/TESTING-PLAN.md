@@ -1,4 +1,50 @@
-# Testing Plan — Trackpad smoothness & Sleep/Wake (Big Sur)
+# Testing Plan — Trackpad smoothness (Big Sur)
+
+> **Sleep is RESOLVED** in Iter 8 / commit `73fa2e7` (GOLDEN promoted to baseline). Cold-boot verified. Working state combines EFI changes (`-igfxblr` + `enable-backlight-registers-fix` + `hbfx-ahbm=1`) and macOS user-space pmset settings (in `/Library/Preferences/SystemConfiguration/`). Don't touch unless it breaks. See README "Sleep — how it actually works".
+
+> **Trackpad is now the only active workstream.** This document focuses on remaining trackpad iterations.
+
+---
+
+## Trackpad — next round (T3 / T4 / user-space tweaks)
+
+### Status as of Iter 8
+
+- VoodooI2C 2.8 + VoodooI2CSynaptics (with SYNA2393 IOPropertyMatch) currently loaded
+- Iter 1 tried 2.9.1 binaries — felt the same
+- Iter 2 reverted to 2.8 — felt the same
+- Iter 3 disabled VoodooI2C entirely (PS/2 path) — felt the same; trackpad-diagnose showed `AppleIntelLpssI2C` (stock macOS I2C HID stack) was probably actually driving it
+- Iter 4 re-enabled, accepted "1/5 jitter, 2-finger scroll OK, 4/5-finger unreliable" as Big Sur limit
+- **User wants to revisit** now that sleep is locked
+
+### Untried levers, ranked by effort
+
+| ID | Approach | Where | Risk |
+|---|---|---|---|
+| **U1** | `defaults write com.apple.AppleMultitouchTrackpad TrackpadFiveFingerPinchGesture -int 2` etc — user-space gesture/sensitivity tuning | `defaults write` commands run as user, no EFI changes | Zero. Reversible per-key. |
+| **U2** | System Settings → Trackpad → Tracking speed slider all the way up; check Three Finger Drag in Accessibility → Pointer Control → Trackpad Options | GUI only | Zero |
+| **U3** | `defaults -currentHost write NSGlobalDomain com.apple.trackpad.scaling -float 5.0` — push scaling beyond slider max | User-space | Zero, easily reverted |
+| **T3** | Switch to **VoodooI2CHID** (generic HID over I2C path, since TPD0 has `_CID = "PNP0C50"`) | Disable VoodooI2CSynaptics in config, enable VoodooI2CHID; keep standalone VoodooInput | Low; may lose Synaptics-specific gestures but pointer might feel smoother |
+| **T4** | Switch to **VoodooRMI** + **VoodooSMBus** (newer Synaptics universal) | Add 2 new kexts, disable VoodooI2CSynaptics; verify SYNA2393 actually matches RMI | Medium; per [VoodooRMI #67](https://github.com/VoodooSMBus/VoodooRMI/issues/67) SYNA2393 RMI support is uncertain |
+| T5 | Tune VoodooI2CSynaptics `IOKitPersonalities` (multitouch parameters, sensitivity) directly in the kext's Info.plist | Edit Info.plist | Low but tedious |
+
+**Recommended order**: U1 + U2 + U3 first (free, zero EFI risk, often gives the biggest perceived improvement), then T3 (cheap config flip, definitive driver swap), then T4 (more invasive, may not even bind).
+
+### Iteration N+1 plan
+
+1. **First** — re-run `trackpad-diagnose.sh` on current GOLDEN baseline to capture which driver actually owns the touchpad now (since Iter 3 evidence pointed at `AppleIntelLpssI2C` stock when VoodooI2C was disabled; need to verify with VoodooI2C re-enabled this is no longer the case).
+2. **Then** apply U1 + U2 + U3 user-space tweaks. Test pointer smoothness 1–5. If now ≥ 4/5 → done, no EFI change needed.
+3. **If still ≤ 3/5** — flip to T3 (VoodooI2CHID) in WIP/EFI; test.
+4. **If T3 also unsatisfactory** — research T4 (VoodooRMI for SYNA2393 specifically) before committing the switch.
+
+### Acceptance criteria
+
+User-subjective: "as smooth as the EliteBook 840 G3's PS/2 trackpad on Sequoia". Reference frame.
+
+Objective hint: pointer movement on a slow finger drag should not visibly stutter; multi-finger gesture recognition should be reliable (3-finger swipe between desktops works > 80% of attempts).
+
+---
+
 
 > **Workflow per iteration:** sync `WIP/EFI/` from `11/BCM94352z/EFI/` → apply iteration changes → mount internal SSD ESP from running Big Sur → `cp -R WIP/EFI/* /Volumes/EFI/EFI/` → reboot → test both trackpad and sleep simultaneously → record results in **Iteration log** below → I update the next iteration based on outcomes.
 
@@ -133,6 +179,79 @@ Expected acceptance criteria:
 `Total Sleep/Wakes since boot: 0` — system never entered real S3.
 
 This is the **classic Hackintosh "Dark Wake stuck on AC"** pattern. On AC, macOS deliberately stays in Dark Wake for push/AirDrop maintenance and only progresses to S3 after various background completions. On battery, the policy is much more aggressive about progressing to S3.
+
+### Iteration 8 — accidental GOLDEN, SSDT disabled, sleep works cleanly
+
+**Hugely surprising result.** User backed up an EFI variant they called "v6" / GOLDEN. Inspection shows it's **structurally identical to Iter 6-rollback / Iter 5 EFI**: SSDT-DISABLE-FP.aml present on disk but `<false/>` in config.plist (i.e., not loaded by OC). So FP, BT, camera all enumerate normally.
+
+User report: **with this GOLDEN config, lid close AND Apple-menu Sleep both enter S3 cleanly, power LED breathes, all hardware (touchpad, TrackPoint, USB-A both sides, audio in/out, camera, ethernet) functional**.
+
+But Iter 5 had IDENTICAL config and reported the 11-12s periodic XDCI wake. What changed?
+
+**The only persistent state we modified between Iter 5 and now is NVRAM via the `pmset -a` commands the sleep-diagnose.sh script ran each iteration (Iter 4 / 5 / 6 / 7)**:
+```
+womp 0 / tcpkeepalive 0 / networkoversleep 0 / powernap 0
+hibernatemode 0 / standby 0 / autopoweroff 0
+proximitywake 0 / sleepservicestimeout 1 / darkwakes 0
+```
+
+These PERSIST across reboots (writes to `nvram` / pmset's plist storage). Some combination of these, applied across 4+ test sessions, evidently silences the periodic XDCI wake we previously attributed to FP.
+
+**Revised hypothesis** (replacing the "Validity FP wakes every 11-12s" theory from Iter 6):
+- The 11-12s wake periodicity was probably **macOS's own Sleep Services / Power Nap heartbeat**, not the FP USB device firing wake interrupts directly.
+- `sleepservicestimeout 1` (Sleep Services window shrunk to 1 second) and/or `proximitywake 0` (Continuity wake disabled, removes a BT-mediated wake event source) cuts off whatever XDCI activity was driving the wake.
+- The FP USB device (`0x138a:0x00ab`) was just enumerated like any other USB device; XDCI wake source naming pointed at the controller, not the FP specifically.
+- Iter 6's SSDT-DISABLE-FP "fixed" sleep coincidentally (because by hiding HS07 we masked one possible source of XHCI activity), but its real success was **also adding wake-source diagnostic that pmset settings could pick up via separate path**.
+
+**Revised pattern moving forward**:
+- WIP/EFI/ now matches GOLDEN: SSDT-DISABLE-FP.aml stays on disk but `Enabled=false` in config — **kept as a spare tire** in case FP misbehavior recurs.
+- The pmset NVRAM settings stay applied (no opt-out unless user explicitly resets NVRAM via OC picker → ResetNVRAM entry).
+- BT, touchpad, all hardware fully functional; periodicity gone.
+
+**If user ever does NVRAM reset**: pmset settings revert to defaults, periodic wake might return. Recovery: re-run `sleep-diagnose.sh` STEP 2 to re-apply pmset settings. Or persist via boot-args / OpenCore NVRAM > Add (would need to find equivalent OC config keys).
+
+**Promote candidate**: this WIP/EFI is the new baseline candidate for `11/BCM94352z/EFI`. Need to verify across cold boot and multiple sleep cycles before promoting (next iteration's user task).
+
+---
+
+### Iteration 5 — BT off probe, isolated periodicity to non-BT device
+
+User turned off Bluetooth in System Settings (verified: `defaults read /Library/Preferences/com.apple.Bluetooth ControllerPowerState` = 0), retested lid-close on battery. Result:
+
+```
+14:11:06 → 14:11:18  Sleep 12s, Wake "due to XDCI/HID Activity"
+14:12:04 → 14:12:15  Sleep 11s, DarkWake "due to XDCI"
+```
+
+**Wake source still XDCI, period still 11-12s** — same fingerprint as Iter 4. BT is **not** the periodic wake source. Process of elimination on the XHCI internal devices points to **Validity / Synaptics fingerprint reader** (`0x138a:0x00ab`, location ID `0x14700000` → port 7 → DSDT `\_SB.PCI0.XHC.RHUB.HS07`). Validity sensors have well-documented spurious USB wake behavior on Hackintosh.
+
+User's own observation matches the log: "好像看到 Wi-Fi 和硬盘 LED 熄灭的一瞬间又亮了" — Wi-Fi/HDD LEDs briefly off then on every 11-12 seconds is exactly the S3-then-immediate-wake cycle.
+
+### Iteration 6 — SSDT-DISABLE-FP to mask the fingerprint USB port
+
+Verified DSDT path of fingerprint reader port:
+```
+\_SB.PCI0.XHC.RHUB.HS07     // _ADR = 0x07, has _UPC + _PLD but no _STA
+```
+
+Since DSDT didn't define `_STA` for HS07, we can extend the device cleanly via SSDT and add a `_STA` that returns Zero on macOS, hiding the port entirely. With no driver attaching, no wake events possible.
+
+**Concrete deltas vs Iter 5**:
+- New file: `WIP/EFI/OC/ACPI/SSDT-DISABLE-FP.aml` (compiled from `.dsl` source, 116 bytes, 0 errors/warnings via `iasl 20260408`)
+- config.plist `ACPI > Add` array gets a new entry for `SSDT-DISABLE-FP.aml` (Enabled=true)
+- No boot-arg changes
+- No kext changes
+- No DeviceProperties changes
+- Bluetooth can be turned back ON in System Settings (we ruled it out as wake source)
+
+**Acceptance**:
+- pmset log shows wake source no longer "due to XDCI" on lid-close test
+- Sleep cycle proceeds beyond 11-12s into stable S3
+- Power LED breathes within seconds of lid close
+
+**If Iter 6 fails** (unlikely but possible): camera (HS08) is the only remaining XHCI internal device. Same SSDT pattern would mask HS08. Or escalate to USBPorts.kext rebuild via USBToolBox.
+
+**Tradeoff accepted**: macOS can't use the fingerprint reader. Mainstream macOS Hackintosh kexts don't support Validity fingerprint readers anyway. BIOS toggle (Advanced → Built-in Device Options) achieves the same effect at the hardware layer without any EFI changes — user can prefer that route if BIOS exposes the toggle and dual-boot Linux fingerprint isn't desired.
 
 ### Iteration 4 — accept trackpad, retest sleep on battery
 
