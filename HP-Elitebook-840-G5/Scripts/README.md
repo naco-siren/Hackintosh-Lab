@@ -16,6 +16,7 @@ each script's output text was the input to one or more iteration entries.
 | [`sleep-diagnose.sh`](sleep-diagnose.sh) | Apply non-EFI pmset sleep-friendly settings, do a guided lid-close test, capture pre/post pmset state + system log | After every EFI iteration that touches sleep |
 | [`trackpad-diagnose.sh`](trackpad-diagnose.sh) | One-shot dump of IOReg / kextstat / USB / system log entries for trackpad investigation | Once after install, then again only if trackpad behavior changes |
 | [`apply-trackpad-prefs.sh`](apply-trackpad-prefs.sh) | Re-apply the user-space trackpad defaults (scaling, 3-finger drag, click thresholds) that complement the Iter 9 I2C HID fix | After any macOS reinstall or `defaults` reset |
+| [`convert-audio-mp3-to-wav.sh`](convert-audio-mp3-to-wav.sh) | Pre-decode OpenCore EFI audio resources from mp3 to 16-bit/48 kHz/stereo PCM wav. Required when the HDA codec lacks 32-bit PCM support (e.g. Conexant CX8200): OC's mp3 decoder produces 32-bit PCM that the codec can't accept, returning `EFI_UNSUPPORTED` at `PlayFile` setup. Pre-decoded wav skips that path. **Runs on the dev Mac, not the Hack** — needs `ffmpeg` in PATH | Once after staging a new EFI release that ships `Resources/Audio/*.mp3` |
 | [`TESTING-PLAN.md`](TESTING-PLAN.md) | Iteration log archive (Iter 1–9 narrative, hypothesis-revision history) | Read for historical context; do not extend unless reopening a workstream |
 
 ## How to run
