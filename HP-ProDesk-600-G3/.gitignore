@@ -1,0 +1,3 @@
+# SMBIOS identity + EFIs carrying it: never commit
+Source/smbios.local.plist
+EFIs/local/

@@ -1,0 +1,22 @@
+/:  Bus 001.Port 001: Dev 001, Class=root_hub, Driver=xhci_hcd/16p, 480M
+    ID 1d6b:0002 Linux Foundation 2.0 root hub
+    |__ Port 013: Dev 002, If 0, Class=Human Interface Device, Driver=usbhid, 12M
+        ID 046d:c52b Logitech, Inc. Unifying Receiver
+    |__ Port 013: Dev 002, If 1, Class=Human Interface Device, Driver=usbhid, 12M
+        ID 046d:c52b Logitech, Inc. Unifying Receiver
+    |__ Port 013: Dev 002, If 2, Class=Human Interface Device, Driver=usbhid, 12M
+        ID 046d:c52b Logitech, Inc. Unifying Receiver
+    |__ Port 014: Dev 003, If 0, Class=Hub, Driver=hub/3p, 12M
+        ID 0a5c:4500 Broadcom Corp. BCM2046B1 USB 2.0 Hub (part of BCM2046 Bluetooth)
+        |__ Port 003: Dev 006, If 0, Class=Vendor Specific Class, Driver=btusb, 12M
+            ID 05ac:821f Apple, Inc. Built-in Bluetooth 2.0+EDR HCI
+        |__ Port 003: Dev 006, If 1, Class=Wireless, Driver=btusb, 12M
+            ID 05ac:821f Apple, Inc. Built-in Bluetooth 2.0+EDR HCI
+        |__ Port 003: Dev 006, If 2, Class=Vendor Specific Class, Driver=btusb, 12M
+            ID 05ac:821f Apple, Inc. Built-in Bluetooth 2.0+EDR HCI
+        |__ Port 003: Dev 006, If 3, Class=Application Specific Interface, Driver=[none], 12M
+            ID 05ac:821f Apple, Inc. Built-in Bluetooth 2.0+EDR HCI
+/:  Bus 002.Port 001: Dev 001, Class=root_hub, Driver=xhci_hcd/10p, 5000M
+    ID 1d6b:0003 Linux Foundation 3.0 root hub
+    |__ Port 003: Dev 002, If 0, Class=Mass Storage, Driver=usb-storage, 5000M
+        ID 0781:5581 SanDisk Corp. Ultra

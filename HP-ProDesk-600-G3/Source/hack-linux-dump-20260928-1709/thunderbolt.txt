@@ -1,0 +1,6 @@
+=== boltctl list ===
+
+=== /sys/bus/thunderbolt/devices/ ===
+(no thunderbolt sysfs entries)
+
+=== dmesg | grep thunderbolt ===

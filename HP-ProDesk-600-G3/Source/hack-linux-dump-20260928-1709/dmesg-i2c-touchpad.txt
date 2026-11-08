@@ -1,0 +1,2 @@
+[    1.378603] i2c_dev: i2c /dev entries driver
+[    6.098980] i2c i2c-6: Successfully instantiated SPD at 0x50
