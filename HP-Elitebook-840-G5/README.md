@@ -63,7 +63,6 @@ HP-Elitebook-840-G5/
 │   │   ├── DEBUG/EFI/             ← Monterey/Ventura with -v debug=0x100 (dev)
 │   │   └── RELEASE/EFI/           ← Monterey/Ventura production (Iter 11)
 │   ├── 13/README.md               ← pointer: Ventura uses 12/ EFI as-is
-│   ├── BlueToolFixup.kext.zip     ← CommandMaker fork source, archived for traceability
 │   └── WIP/EFI/                   ← dev scratchpad, mirror of latest working state
 ├── Scripts/                        ← diagnostic + setup helpers
 │   ├── README.md                  ← how to run + what each one does
