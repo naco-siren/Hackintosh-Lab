@@ -134,7 +134,7 @@ User mounted ESP, copied WIP/EFI to /Volumes/EFI/EFI, rebooted.
 
 **Lessons (carry forward)**:
 - *Always check kextstat for kext-load confirmation before reasoning about driver chain.* If a kext is "enabled in config" but absent from kextstat, the IOPropertyMatch failed and the kext is inert. Iter 1–8 would have been one iteration if kextstat had been re-read at any point.
-- *The DSDT `_HID/_CID` and the macOS-runtime `IOName` are not always the same.* SOURCE-OF-TRUTH SSDTs say one thing (TPD0 / SYNA2393); IOReg says another (SYNA3071 / PNP0C50). Both can be true simultaneously — the SSDT defines the device, the runtime IOReg shows what enumerated. If a kext's IOPropertyMatch is keyed on the wrong field, it never binds.
+- *The DSDT `_HID/_CID` and the macOS-runtime `IOName` are not always the same.* `Source/` SSDTs say one thing (TPD0 / SYNA2393); IOReg says another (SYNA3071 / PNP0C50). Both can be true simultaneously — the SSDT defines the device, the runtime IOReg shows what enumerated. If a kext's IOPropertyMatch is keyed on the wrong field, it never binds.
 - *Dual-bus enumeration is real on this hardware.* The PS/2 emulation lane stays active even when I2C path is unclaimed. PS/2 wins by default if no I2C driver matches. Iter 9's fix is "explicitly claim I2C side AND silence PS/2 side", not "swap one I2C kext for another".
 
 ### Iteration 1 — ❌ failed both fronts

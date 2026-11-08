@@ -15,7 +15,7 @@
 | Keyboard | PS/2 |
 | Thunderbolt | TB3 (Alpine Ridge LP) — set to **Native + Low Power** in BIOS |
 
-ACPI ground truth in [`SOURCE-OF-TRUTH/`](SOURCE-OF-TRUTH/) (two SSDTTime captures + Linux probe dumps with each WLAN card).
+ACPI ground truth in [`Source/`](Source/) (two SSDTTime captures + Linux probe dumps with each WLAN card).
 
 ## SMBIOS
 
@@ -25,7 +25,7 @@ ACPI ground truth in [`SOURCE-OF-TRUTH/`](SOURCE-OF-TRUTH/) (two SSDTTime captur
 
 | Version | Status | Notes |
 |---|---|---|
-| **11 Big Sur** (11.7.10) | ✅ Working | Full WiFi/BT/AirDrop/Handoff via the classic BrcmPatchRAM firmware-injection path (Iter 8 GOLDEN). Sleep solved Iter 8, trackpad Iter 9 (I2C HID swap). EFI: [`EFIs/11/BCM94352z/EFI/`](EFIs/11/BCM94352z/EFI/). EOL — no security updates since 2023-09. |
+| **11 Big Sur** (11.7.10) | ✅ Working | Full WiFi/BT/AirDrop/Handoff via the classic BrcmPatchRAM firmware-injection path (Iter 8 GOLDEN). Sleep solved Iter 8, trackpad Iter 9 (I2C HID swap). EFI: [`EFIs/11/BCM94352z/{DEBUG,RELEASE}/EFI/`](EFIs/11/BCM94352z/). EOL — no security updates since 2023-09. |
 | **12 Monterey** | ✅ **Working** (Iter 11) | Native BT — `bluetoothd` identifies the BCM20702A1 as Apple-internal (Vendor `0x004C`, Chipset `BCM_20702A3`, factory firmware `v14 c4096`) — via CommandMaker BlueToolFixup fork + cutting the entire `BrcmPatchRAM3 / BrcmBluetoothInjector / BrcmFirmwareData` trio with `MaxKernel=20.99.99`. EFI: [`EFIs/12/BCM94352z/{DEBUG,RELEASE}/EFI/`](EFIs/12/BCM94352z/). |
 | **13 Ventura** | ✅ **Working via 12/ EFI** (verified Iter 11) | Same EFI as Monterey loads unchanged on Ventura — kernel-version gating (`MinKernel=21.0.0` on the fork BlueToolFixup, `MaxKernel=20.99.99` on the BrcmPatchRAM trio) covers Darwin 21–22 identically. See [`EFIs/13/README.md`](EFIs/13/README.md). Currently receiving Apple security updates. |
 | 14 Sonoma | ⚠️ Intentionally skipped | Apple removes stock BCM4352 driver and replaces IO80211Family with IOSkywalkFamily. Workable via injecting `IO80211FamilyLegacy.kext` + `IOSkywalkFamily.kext` + a Skywalk Block-downgrade entry, but per-dot-release maintenance burden. User chose Ventura as the daily-driver plateau. |
@@ -58,7 +58,7 @@ Both recipes ship in the same EFI thanks to MinKernel/MaxKernel gating; OpenCore
 HP-Elitebook-840-G5/
 ├── README.md                       ← this file
 ├── EFIs/                           ← all per-(macOS × WLAN-card) EFI variants
-│   ├── 11/BCM94352z/EFI/          ← Big Sur (Iter 8 GOLDEN; daily-driver-grade)
+│   ├── 11/BCM94352z/{DEBUG,RELEASE}/EFI/ ← Big Sur (Iter 8 GOLDEN; daily-driver-grade)
 │   ├── 12/BCM94352z/
 │   │   ├── DEBUG/EFI/             ← Monterey/Ventura with -v debug=0x100 (dev)
 │   │   └── RELEASE/EFI/           ← Monterey/Ventura production (Iter 11)
@@ -72,7 +72,7 @@ HP-Elitebook-840-G5/
 │   ├── trackpad-diagnose.sh       ← one-shot IOReg/kextstat/log dump
 │   ├── apply-trackpad-prefs.sh    ← user-space trackpad defaults (post-reinstall)
 │   └── convert-audio-mp3-to-wav.sh ← chime-fix helper for 16-bit codecs (Iter 10)
-└── SOURCE-OF-TRUTH/                ← DSDT/SSDT + Linux probe dumps
+└── Source/                         ← DSDT/SSDT + Linux probe dumps (was SOURCE-OF-TRUTH/)
     ├── 1st time/SSDTTime-Results/
     ├── 1st time/hack-linux-dump-...-Intel8265NGW/
     ├── 1st time/hack-linux-dump-...-BCM94352z/
